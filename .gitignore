@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+code/outputs/
+report/figs/
+report/generated.md
+report/*.pdf
+report/*.aux
+report/*.log
+report/*.out
+submission/

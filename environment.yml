@@ -1,0 +1,11 @@
+name: dia-assignment4
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - numpy>=1.24
+  - pillow>=9.1
+  - matplotlib>=3.6
+  - scipy>=1.8
+  - pandoc
+  - texlive-core
