@@ -5,6 +5,7 @@ import numpy as np
 from dia.common import blur,laplace,gradient
 from dia.scissors import marr_hildreth,link_costs,dijkstra,trace
 from dia.regions import fit_gaussian,nll,kmeans,graphcut,energy,rectangle_em
+from dia.evaluation import agreement,expand,read_seg
 from dia.keypoints import derivatives3,localize,extrema,harris,corners,affine_image,repeatability
 
 
@@ -93,9 +94,20 @@ class Algorithms(unittest.TestCase):
         pts=corners(r);self.assertLess(np.linalg.norm(pts-[20,20],axis=1).min(),4)
         self.assertTrue((det>=-1e-15).all());self.assertTrue((tr>=0).all())
 
+    def test_agreement_known_masks(self):
+        ref=np.zeros((12,14),bool);ref[3:9,4:10]=True
+        same=agreement(ref,[ref,ref])
+        for k in ['iou','precision','recall','boundary_f1']:self.assertEqual(same[k],1)
+        empty=agreement(np.zeros_like(ref),[ref]);self.assertEqual(empty['iou'],0)
+        subset=np.zeros_like(ref);subset[3:6,4:10]=True
+        self.assertAlmostEqual(agreement(subset,[ref])['iou'],.5)
+        impulse=np.zeros((7,7),bool);impulse[3,3]=True
+        self.assertEqual(expand(impulse,1).sum(),5)
+
     def test_affine_identity_and_geometry(self):
         im=np.random.default_rng(1).random((20,30,3));out,a,c,v=affine_image(im,0,1,1,0,0)
-        np.testing.assert_allclose(out[v],im[v],atol=1e-14)
+        self.assertTrue(v.all())
+        np.testing.assert_allclose(out,im,atol=1e-14)
         p=np.array([[15.,10.,1.],[13.,9.,1.]])
         expected,stats=repeatability(p,p,a,c,1,np.ones((20,30),bool))
         self.assertEqual(stats['matches'],2);self.assertEqual(stats['repeatability'],1)

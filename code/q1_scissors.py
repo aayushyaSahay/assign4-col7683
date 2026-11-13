@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse
 import numpy as np
 from dia.common import load,gray,panels,save,metrics
+from dia.annotations import wing_seeds
 from dia.scissors import marr_hildreth,link_costs,dijkstra,closed_path
 
 
@@ -10,9 +11,7 @@ def main():
     ap=argparse.ArgumentParser();ap.add_argument('--image',default='inputs/35070.jpg');ap.add_argument('--size',type=int,default=320);ap.add_argument('--outdir',default='outputs/q1');args=ap.parse_args()
     out=Path(args.outdir);out.mkdir(parents=True,exist_ok=True)
     im=load(args.image,args.size);g=gray(im);save(out/'original.png',im)
-    # Manually selected wing silhouette seeds, stored in original 481x321 coordinates (x,y).
-    xy=np.array([[303,135],[244,124],[170,121],[103,114],[72,126],[66,145],[81,167],[119,182],[172,184],[232,169],[291,150]])
-    seeds=np.rint(xy*np.array([im.shape[1]/481,im.shape[0]/321])).astype(int)[:,::-1].tolist()
+    seeds=wing_seeds(im.shape)
     def marks(ax):
         a=np.array(seeds);ax.scatter(a[:,1],a[:,0],s=14,c='red')
         for i,(y,x) in enumerate(a):ax.text(x+2,y-2,str(i+1),fontsize=7,color='white')

@@ -50,3 +50,23 @@ three-tap finite differences. PNGs are display-quantized; algorithms retain floa
 All selected parameters, convergence counts, model covariances and repeatability
 measurements are saved in `outputs/qN/metrics.json`; report tables read these files.
 The experiments are deterministic, including noise (seed 4).
+
+## Parameter study
+
+```sh
+python3 parameter_study.py                 # all studies
+python3 parameter_study.py --part q1       # or q2 / q3
+```
+
+Run from `code/`, or use `make study` at repository root. These runs use fixed
+manual annotations from `dia/annotations.py` and the same resolutions as the
+main scripts. Outputs go to `outputs/study` independently of `outputs/q1..q3`.
+All figure/table values come from the saved records, and no trial is silently
+omitted. Five raw human `.seg` files are retained under `inputs/human`; the
+reference masks are nearest-neighbor resampled. Label 1 is the main insect in
+each. `dia/evaluation.py` implements IoU and tolerance-based boundary F1.
+
+The 3-sigma keypoint support exclusion is a practical margin; Gaussian kernels
+are truncated at 5 sigma, so it is not a claim of zero border influence.
+Identity inverse mapping preserves the last row/column exactly and is covered
+by the resampling test and the identity case in the study.

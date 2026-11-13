@@ -85,8 +85,8 @@ def affine_image(im, angle=22, zoom=.82, gain=.85, offset=.07, noise=.008, seed=
     center=np.array([(w-1)/2,(h-1)/2]); y,x=np.mgrid[:h,:w]
     source=(np.stack([x,y],-1)-center)@np.linalg.inv(a).T+center
     sx,sy=source[...,0],source[...,1];x0=np.floor(sx).astype(int);y0=np.floor(sy).astype(int)
-    valid=(x0>=0)&(x0+1<w)&(y0>=0)&(y0+1<h)
-    xx=np.clip(x0,0,w-2);yy=np.clip(y0,0,h-2);fx=(sx-x0)[...,None];fy=(sy-y0)[...,None]
+    valid=(sx>=0)&(sx<=w-1)&(sy>=0)&(sy<=h-1)
+    xx=np.clip(x0,0,w-2);yy=np.clip(y0,0,h-2);fx=(sx-xx)[...,None];fy=(sy-yy)[...,None]
     out=(1-fy)*((1-fx)*im[yy,xx]+fx*im[yy,xx+1])+fy*((1-fx)*im[yy+1,xx]+fx*im[yy+1,xx+1])
     out=gain*out+offset+np.random.default_rng(seed).normal(0,noise,out.shape)
     out=np.clip(out,0,1);out[~valid]=.5

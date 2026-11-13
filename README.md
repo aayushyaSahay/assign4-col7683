@@ -57,3 +57,24 @@ The report uses the same team as Assignment 3: Aayushya Sahay (2023CS10543) and
 Manvendra Rajpurohit (2023CS10936). Each member must separately submit the
 individual contribution form mentioned in the brief. The ZIP/PDF are prepared
 locally; Moodle upload and contribution statements are left to the team.
+
+## Expanded parameter study
+
+`make study` evaluates 88 Marr--Hildreth settings, 26 closed-path/seed variants,
+49 graph-cut settings, 10 Gaussian/k-means variants, 32 rectangle settings,
+64 keypoint threshold pairs across nine perturbation cases (576 evaluations),
+81 Harris settings, and three scale ladders. The report includes the sensitivity
+maps, improved alternatives, and the tradeoffs behind the recommendations.
+
+The five original Berkeley human annotations are bundled for evaluation only.
+The study records mean overlap and boundary agreement across all five; region
+models and edge costs never use these labels. These are same-image development
+results, not held-out benchmark scores. Keypoints are assessed using the known
+transformation, including three noise seeds and paired position-error comparisons.
+
+All trial records are in `code/outputs/study/*.csv` and `*.json`; the ZIP includes
+these small tabular records as well as the source needed to regenerate them.
+The initial question figures remain controlled reference experiments. The report's
+expanded-study section shows the improved edge and rectangle results and the
+area/boundary and match-count/repeatability tradeoffs. There is no claim of a
+universally optimal parameter setting.

@@ -30,7 +30,8 @@ zeros are allowed; the strictly positive strength threshold removes flat zeros.
 The slope threshold is measured in grayscale intensity per discrete neighbor
 pair, without normalization by image maximum or diagonal spacing.
 
-The selected setting is $\sigma=1.4$, $\tau=0.01$. The following controlled
+The initial reference setting is $\sigma=1.4$, $\tau=0.01$.
+Section 4 reports a wider search and a cleaner selected edge map. The following controlled
 sweeps change one parameter at a time. A smaller smoothing scale retains weak
 leaf texture and wing detail; larger smoothing suppresses texture but also
 loses fine boundaries. Lowering the threshold admits clutter; raising it leaves
@@ -177,12 +178,12 @@ our queue traversal from the source follows strictly positive residual
 capacities in $C-F$; reachable image pixels are FG. Seed enforcement is checked
 for every reported run.
 
-The selected baseline is $\lambda=2$, $\sigma=0.08$. The sweeps change one
+The reference baseline is $\lambda=2$, $\sigma=0.08$. The sweeps change one
 parameter at a time: $\lambda=0.02,40$ and $\sigma=0.008,0.8$.
 ''')
 table(['Lambda','Sigma','FG pixels','Real shifted energy','Integer min cut'],[(r['lambda'],r['sigma'],r['foreground_pixels'],f"{r['energy']:.3f}",r['integer_cut']) for r in b['graphcuts']])
 fig('q2_graphcuts.png','Baseline graph cut and much smaller/larger smoothness and color-scale settings.','78%')
-add('Lower lambda gives a result close to independent ML, apart from fixed annotations. Larger lambda suppresses speckles and removes some thin structures. Very small sigma allows many inexpensive boundaries even within the object, weakening smoothness. Very large sigma makes pairwise weights nearly independent of contrast, favoring smoother contours and erasing narrow appendages. The baseline retains the main silhouette while reducing clutter. Some thin bright structures remain absent because the foreground model was learned mainly from the dark wing. Energies from different parameter settings define different objectives and are not directly comparable measures of accuracy.')
+add('Lower lambda gives a result close to independent ML, apart from fixed annotations. Larger lambda suppresses speckles and removes some thin structures. Very small sigma allows many inexpensive boundaries even within the object, weakening smoothness. Very large sigma makes pairwise weights nearly independent of contrast, favoring smoother contours and erasing narrow appendages. The baseline retains the main silhouette while reducing clutter; Section 4 quantifies the region/boundary tradeoff against stronger smoothing. Some thin bright structures remain absent because the foreground model was learned mainly from the dark wing. Energies from different parameter settings define different objectives and are not directly comparable measures of accuracy.')
 add(r'''
 \newpage
 ## (d) Rectangle-only Gaussian/ML alternation
@@ -281,7 +282,7 @@ contrast beyond the initial candidate floor. We also show their intersection.
 table(['Criterion','Surviving localized keypoints'],[(k.replace('_',' '),v) for k,v in c['criteria_counts'].items()])
 fig('q3_criteria.png','Independent contrast thresholds (top) and edge-ratio thresholds (bottom).')
 fig('q3_selected.png',f"Both selected criteria T=0.025 and r=10: {c['selected_keypoints']} points.",'85%')
-add('Raising contrast preferentially removes faint responses. Tightening the curvature ratio removes elongated edge detections, while preserving more balanced blobs. We select T=0.025 and r=10 as a visual compromise between coverage and clutter on the architecture. These settings are not optimized against human keypoint annotations or a held-out evaluation set. Large circles represent larger spatial support, not higher confidence.')
+add('Raising contrast preferentially removes faint responses. Tightening the curvature ratio removes elongated edge detections, while preserving more balanced blobs. We initially select T=0.025 and r=10 as a visual compromise between coverage and clutter on the architecture. Section 4 tests a wider joint threshold grid. These settings are not optimized against human keypoint annotations or a held-out evaluation set. Large circles represent larger spatial support, not higher confidence.')
 add(r'''
 \newpage
 ## (d) Transformation and geometric repeatability
@@ -309,17 +310,20 @@ table(['Detector','Visible originals','Matches','Repeatability','Mean matched er
 add(f"The modified image has {c['modified_keypoints']} selected supported detections. The refined detector repeats {l['matches']} of {l['eligible']} eligible original points ({100*l['repeatability']:.1f}%).")
 add(f"Taylor refinement changes mean matched error from {d['mean_error_px']:.3f} to {l['mean_error_px']:.3f} pixels. Repeatability changes from {100*d['repeatability']:.1f}% to {100*l['repeatability']:.1f}%, so the observed benefit is finer localization of accepted matches rather than a higher matched fraction.")
 add('The two detector rows use their respective eligible sets, so they measure overall detector behavior rather than paired error on an identical set. Subpixel fitting can reduce quantization, but may reject unstable fits or alter the set that passes contrast/curvature tests. Gain changes LoG contrast, rotation changes the sampling grid, noise perturbs derivatives, and the finite scale ladder shifts preferred scales. Consequently the correspondence is partial. The plots and measured errors describe the observed result; no perfect scale/rotation invariance is assumed.')
+from study_assets import study_sections
+add(study_sections(ROOT))
+
 add(r'''
 \newpage
 # Verification and reproducibility
 
-Thirteen test groups check Gaussian impulse normalization and constants,
+Fourteen test groups check Gaussian impulse normalization and constants,
 polynomial derivatives, step-edge behavior, Dijkstra against independent
 Bellman--Ford relaxation and known grid distances, analytic Gaussian log
 likelihoods, constrained k-means monotonicity, binary graph cuts against all
 64 labelings of a 2 x 3 image across five random examples, rectangle-only separation of two synthetic colors, exact Taylor recovery
 of a known subpixel quadratic peak, strict extrema/tie rejection, Harris on
-constant/quadrant images, and identity resampling/geometric repeatability.
+constant/quadrant images, identity resampling/geometric repeatability, and mask-agreement scores with analytically known values.
 All tests use small deterministic arrays; experimental masks are not used as
 their expected answers. The covariance regularization, hard-seed enforcement,
 integer energy quantization and limitations are explicit in the implementation.

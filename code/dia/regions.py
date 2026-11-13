@@ -16,18 +16,19 @@ def nll(x, model):
     return .5*(np.einsum('...i,ij,...j->...',d,np.linalg.inv(cov),d)+np.linalg.slogdet(cov)[1]+len(mean)*np.log(2*np.pi))
 
 
-def likelihood_classify(im, fg, bg):
-    models = [fit_gaussian(im[bg]),fit_gaussian(im[fg])]
+def likelihood_classify(im, fg, bg, regularization=4e-4):
+    models = [fit_gaussian(im[bg],regularization),fit_gaussian(im[fg],regularization)]
     costs = np.stack([nll(im,m) for m in models],axis=-1)
     return costs.argmin(-1).astype(bool),costs,models
 
 
-def kmeans(im, fg, bg, max_iter=100):
+def kmeans(im, fg, bg, max_iter=100, constrain=True):
     means=np.array([im[bg].mean(0),im[fg].mean(0)])
     history=[]; wc=[]; previous=None
     for _ in range(max_iter):
         d=((im[:,:,None,:]-means)**2).sum(-1)
-        labels=d.argmin(-1).astype(bool); labels[fg]=True; labels[bg]=False
+        labels=d.argmin(-1).astype(bool)
+        if constrain: labels[fg]=True; labels[bg]=False
         for k in (0,1):
             if np.any(labels==k): means[k]=im[labels==k].mean(0)
         wc.append(float(((im-means[labels.astype(int)])**2).sum()))
@@ -85,10 +86,10 @@ def energy(im,costs,labels,lam,sigma):
     return float(unary+v[flat[p]!=flat[q]].sum())
 
 
-def rectangle_em(im, rect, max_iter=60, regularization=.008):
+def rectangle_em(im, rect, max_iter=60, regularization=.008, ring_width=4):
     """Rectangle-only Gaussian/ML alternation requested by Q2(d), no graph cuts."""
     x0,y0,x1,y1=rect; inside=np.zeros(im.shape[:2],bool);inside[y0:y1,x0:x1]=True
-    inner=np.zeros_like(inside);inner[y0+4:y1-4,x0+4:x1-4]=True
+    inner=np.zeros_like(inside);inner[y0+ring_width:y1-ring_width,x0+ring_width:x1-ring_width]=True
     ring=inside & ~inner
     models=[fit_gaussian(im[ring],regularization),fit_gaussian(im[inner],regularization)]
     hist=[]; stats=[];prev=None

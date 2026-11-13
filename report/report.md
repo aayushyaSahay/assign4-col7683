@@ -34,7 +34,8 @@ facade provide blobs and corners for Q3. Original archive paths, source links
 and original JPEGs are included in `code/inputs`. Q1 and Q2 use 320 x 214 pixels;
 Q3 uses 400 x 267. The brief requires dataset images and does not require any
 student-captured photograph. We use visual interpretation of the photographs;
-we do not claim human segmentation masks or benchmark accuracy scores.
+the expanded study compares outputs to all five supplied human segmentations.
+These are same-image development measurements, not a held-out benchmark.
 
 Colours are RGB in [0,1]. Grayscale is $0.299R+0.587G+0.114B$. All numerical
 processing uses floating point; only final PNG display images are quantized.
@@ -45,7 +46,7 @@ Spatial derivatives use centered differences; the Laplacian is the sum of the
 horizontal and vertical $[1,-2,1]$ differences.
 
 `make test` checks independent small references and numerical invariants.
-`make all` runs all experiments and creates measured report tables, figures,
+`make all` runs all experiments and creates measured report tables, figures, the expanded parameter study,
 this PDF, and the source ZIP. Inputs, annotations, random seeds and parameters
 are included, so a clean extraction needs no downloads. The generated sections
 below include the results and their interpretation for every subpart.

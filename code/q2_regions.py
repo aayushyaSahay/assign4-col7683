@@ -5,21 +5,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from dia.common import load,panels,save,metrics,segmentation
+from dia.annotations import FG_RECTS,BG_RECTS,OBJECT_RECT,source_rect,region_seeds
 from dia.regions import likelihood_classify,kmeans,graphcut,energy,rectangle_em
 
 
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--image',default='inputs/35070.jpg');ap.add_argument('--size',type=int,default=320);ap.add_argument('--outdir',default='outputs/q2');args=ap.parse_args()
     out=Path(args.outdir);out.mkdir(parents=True,exist_ok=True);im=load(args.image,args.size);h,w=im.shape[:2]
-    # Rectangles (x0,y0,x1,y1), manually selected in original source coordinates.
-    fg_rects=[(95,132,225,158),(150,160,183,171)]
-    bg_rects=[(15,15,450,70),(15,275,450,315),(380,225,470,265),(445,110,475,215)]
-    def rects_mask(rects):
-        mask=np.zeros((h,w),bool)
-        for r in rects:
-            x0,y0,x1,y1=np.rint(np.array(r)*[w/481,h/321,w/481,h/321]).astype(int);mask[y0:y1,x0:x1]=True
-        return mask
-    fg,bg=rects_mask(fg_rects),rects_mask(bg_rects)
+    fg_rects,bg_rects=FG_RECTS,BG_RECTS
+    fg,bg=region_seeds(im.shape)
     training=im.copy();training[fg]=[1,.1,.1];training[bg]=[.1,.4,1]
     labels,costs,models=likelihood_classify(im,fg,bg)
     likes=np.exp(-(costs-costs.min((0,1),keepdims=True)))
@@ -37,7 +31,7 @@ def main():
         entries.append((f'lambda={lam:g}, sigma={sigma:g}',segmentation(im,mask)))
         if lam==2 and sigma==.08:save(out/'graphcut_mask.png',mask)
     panels(out/'graphcuts.png',entries,cols=3)
-    rect=tuple(np.rint(np.array([35,80,450,270])*[w/481,h/321,w/481,h/321]).astype(int))
+    rect=source_rect(OBJECT_RECT,im.shape)
     hist,stats,inner,ring=rectangle_em(im,rect)
     def draw(ax):
         x0,y0,x1,y1=rect;ax.add_patch(Rectangle((x0,y0),x1-x0,y1-y0,fill=False,edgecolor='yellow',lw=1.5))

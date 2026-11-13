@@ -19,3 +19,18 @@ The dataset credits the source photographs to Corel. These are dataset images,
 not student photographs or a claim of unrestricted public-domain licensing.
 Only generated outputs are PNG. No personally captured photos are required by
 the assignment, which explicitly requests Berkeley training images in every problem.
+
+## Human references for the parameter study
+
+`human/{1105,1108,1109,1112,1124}.seg` are the five color annotations of image
+35070 from the official `BSDS300-human.tgz` archive, downloaded 2026-11-14:
+https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/BSDS300-human.tgz
+Archive paths: `BSDS300/human/color/<annotator>/35070.seg`.
+
+Each annotator's region **1** identifies the main insect. All five region-1
+masks are used, without choosing a favorable annotator. The masks are resized
+with nearest-neighbor sampling for evaluation at 320x214; image-derived costs
+and the manually selected seeds/rectangles do not read them. Full label maps
+are used only for evaluating all-region edge agreement in Q1(a). The five raw
+files are included so the study is reproducible without a download. The study
+is a same-image development analysis, not a held-out benchmark.
